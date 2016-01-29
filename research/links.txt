@@ -1,0 +1,14 @@
+
+#Render 360 video
+https://stackoverflow.com/questions/32391771/how-to-make-a-simple-vr-video-player-by-google-cardboard-android-sdk-and-rajawal
+
+#Render video side by side 
+https://github.com/Sveder/CardboardPassthrough
+A modified version of this is probably what i want
+
+#Render video stream
+https://stackoverflow.com/questions/30028156/using-video-stream-as-open-gl-es-2-0-texture/30159592#30159592
+
+
+#Host wifi from linux devices
+https://nims11.wordpress.com/2012/04/27/hostapd-the-linux-way-to-create-virtual-wifi-access-point/
