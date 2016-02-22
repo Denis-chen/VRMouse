@@ -15,30 +15,11 @@
 
 package com.example.octopuscabbage.vrmouse;
 
-import android.content.ContentProvider;
 import android.content.Context;
-import android.graphics.SurfaceTexture;
-import android.graphics.SurfaceTexture.OnFrameAvailableListener;
-import android.media.MediaDataSource;
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.opengl.GLES20;
-import android.opengl.Matrix;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceHolder;
 
+import com.example.octopuscabbage.vrmouse.rendering.Renderer;
 import com.google.vrtoolkit.cardboard.*;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 /**
  * A Cardboard sample application.
@@ -56,11 +37,7 @@ public class MainActivity extends CardboardActivity{
     public static Context getContext(){
         return context;
     }
-    /**
-     * Sets the view to our CardboardView and initializes the transformation matrices we will use
-     * to render our scene.
-     * @param savedInstanceState
-     */
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,4 +56,9 @@ public class MainActivity extends CardboardActivity{
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        renderer.pauseStreams();
+    }
 }

@@ -1,10 +1,11 @@
-package com.example.octopuscabbage.vrmouse;
+package com.example.octopuscabbage.vrmouse.rendering;
 
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.util.Log;
 
+import com.example.octopuscabbage.vrmouse.Toaster;
 import com.google.vrtoolkit.cardboard.CardboardView;
 import com.google.vrtoolkit.cardboard.Eye;
 import com.google.vrtoolkit.cardboard.HeadTransform;
@@ -36,48 +37,14 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
     private float[] mView;
     private float[] mCamera;
 
-    private final String vertexShaderCode =
-            "attribute vec4 position;" +
-                    "attribute vec2 inputTextureCoordinate;" +
-                    "varying vec2 textureCoordinate;" +
-                    "void main()" +
-                    "{"+
-                    "gl_Position = position;"+
-                    "textureCoordinate = inputTextureCoordinate;" +
-                    "}";
-
-    private final String fragmentShaderCode =
-            "#extension GL_OES_EGL_image_external : require\n"+
-                    "precision mediump float;" +
-                    "varying vec2 textureCoordinate;                            \n" +
-                    "uniform samplerExternalOES s_texture;               \n" +
-                    "void main(void) {" +
-                    "  gl_FragColor = texture2D( s_texture, textureCoordinate );\n" +
-                    "}";
-    static final int COORDS_PER_VERTEX = 2;
-    static float squareVertices[] = { // in counterclockwise order:
-            -1.0f, -1.0f,   // 0.left - mid
-            1.0f, -1.0f,   // 1. right - mid
-            -1.0f, 1.0f,   // 2. left - top
-            1.0f, 1.0f,   // 3. right - top
-    };
-
-    private ShortBuffer drawListBuffer, buf2;
+    private ShortBuffer drawListBuffer;
     private int mProgram;
-    private int mPositionHandle, mPositionHandle2;
+    private int mPositionHandle;
     private int mColorHandle;
     private int mTextureCoordHandle;
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    private short drawOrder[] =  {0, 2, 1, 1, 2, 3 }; // order to draw vertices
-    static float textureVertices[] = {
-            0.0f, 1.0f,  // A. left-bottom
-            1.0f, 1.0f,  // B. right-bottom
-            0.0f, 0.0f,  // C. left-top
-            1.0f, 0.0f   // D. right-top
-    };
 
-    private FloatBuffer vertexBuffer, textureVerticesBuffer, vertexBuffer2;
+    private FloatBuffer vertexBuffer, textureVerticesBuffer;
 
     public Renderer(){
         mCamera = new float[16];
@@ -146,20 +113,20 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
 
         mPositionHandle = GLES20.glGetAttribLocation(mProgram, "position");
         GLES20.glEnableVertexAttribArray(mPositionHandle);
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT,
-                false,vertexStride, vertexBuffer);
+        GLES20.glVertexAttribPointer(mPositionHandle, RenderConstants.COORDS_PER_VERTEX, GLES20.GL_FLOAT,
+                false, RenderConstants.vertexStride, vertexBuffer);
 
 
         mTextureCoordHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
         GLES20.glEnableVertexAttribArray(mTextureCoordHandle);
-        GLES20.glVertexAttribPointer(mTextureCoordHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT,
-                false,vertexStride, textureVerticesBuffer);
+        GLES20.glVertexAttribPointer(mTextureCoordHandle, RenderConstants.COORDS_PER_VERTEX, GLES20.GL_FLOAT,
+                false, RenderConstants.vertexStride, textureVerticesBuffer);
 
         mColorHandle = GLES20.glGetAttribLocation(mProgram, "s_texture");
 
 
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.length,
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, RenderConstants.drawOrder.length,
                 GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
 
 
@@ -185,7 +152,7 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
 
 
     /**
-     * Create textures array
+     * Create textures array for each eye
      * @return textures array, 0 is left, 1 is right
      */
     private static int[] createTextures()
@@ -233,28 +200,28 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
     public void onSurfaceCreated(EGLConfig eglConfig) {
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 0.5f); // Dark background so text shows up well
 
-        ByteBuffer bb = ByteBuffer.allocateDirect(squareVertices.length * 4);
+        ByteBuffer bb = ByteBuffer.allocateDirect(RenderConstants.squareVertices.length * 4);
         bb.order(ByteOrder.nativeOrder());
         vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(squareVertices);
+        vertexBuffer.put(RenderConstants.squareVertices);
         vertexBuffer.position(0);
 
 
-        ByteBuffer dlb = ByteBuffer.allocateDirect(drawOrder.length * 2);
+        ByteBuffer dlb = ByteBuffer.allocateDirect(RenderConstants.drawOrder.length * 2);
         dlb.order(ByteOrder.nativeOrder());
         drawListBuffer = dlb.asShortBuffer();
-        drawListBuffer.put(drawOrder);
+        drawListBuffer.put(RenderConstants.drawOrder);
         drawListBuffer.position(0);
 
 
-        ByteBuffer bb2 = ByteBuffer.allocateDirect(textureVertices.length * 4);
+        ByteBuffer bb2 = ByteBuffer.allocateDirect(RenderConstants.textureVertices.length * 4);
         bb2.order(ByteOrder.nativeOrder());
         textureVerticesBuffer = bb2.asFloatBuffer();
-        textureVerticesBuffer.put(textureVertices);
+        textureVerticesBuffer.put(RenderConstants.textureVertices);
         textureVerticesBuffer.position(0);
 
-        int vertexShader = loadGLShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = loadGLShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = loadGLShader(GLES20.GL_VERTEX_SHADER, RenderConstants.vertextShaderCode);
+        int fragmentShader = loadGLShader(GLES20.GL_FRAGMENT_SHADER, RenderConstants.fragmentShaderCode);
 
         mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
         GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
@@ -274,7 +241,7 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
 
     @Override
     public void onRendererShutdown() {
-
+        pauseStreams();
     }
 
     @Override
@@ -282,4 +249,27 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
 
     }
 
+    public void pauseStreams(){
+        applyToBothStreams(new StreamApply() {
+            @Override
+            public void applyToStream(PlayStream stream) {
+                stream.pause();
+            }
+        });
+    }
+
+    /*
+    Used for applying an operation to a stream.
+    I miss Java 8
+     */
+    public interface StreamApply {
+        void applyToStream(PlayStream stream);
+    }
+    /*
+    Apply an operation to the left and right stream;
+     */
+    public void applyToBothStreams(StreamApply apply){
+        apply.applyToStream(leftStream);
+        apply.applyToStream(rightStream);
+    }
 }

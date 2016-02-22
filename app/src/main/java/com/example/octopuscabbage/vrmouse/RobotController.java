@@ -1,5 +1,7 @@
 package com.example.octopuscabbage.vrmouse;
 
+import com.example.octopuscabbage.vrmouse.rendering.Renderer;
+
 /**
  * Created by octopuscabbage on 1/24/16.
  */

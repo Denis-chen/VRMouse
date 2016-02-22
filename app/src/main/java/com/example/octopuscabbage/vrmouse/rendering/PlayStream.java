@@ -1,10 +1,14 @@
-package com.example.octopuscabbage.vrmouse;
+package com.example.octopuscabbage.vrmouse.rendering;
 
 import android.graphics.SurfaceTexture;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 import android.view.Surface;
+
+import com.example.octopuscabbage.vrmouse.MainActivity;
+import com.example.octopuscabbage.vrmouse.Toaster;
 
 import java.io.IOException;
 
@@ -37,6 +41,10 @@ public class PlayStream {
         this.toaster = toaster;
     }
 
+    public void pause(){
+        mediaPlayer.pause();
+    }
+
     public void start(){
         if(hasPrepared){
             return;
@@ -47,7 +55,7 @@ public class PlayStream {
         mediaPlayer.setSurface(surface);
         try
         {
-            mediaPlayer.setDataSource(MainActivity.getContext(),uri);
+            mediaPlayer.setDataSource(MainActivity.getContext(), uri);
             mediaPlayer.prepareAsync();
             mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                 @Override
@@ -62,6 +70,7 @@ public class PlayStream {
                     mp.setLooping(true);
                 }
             });
+            mediaPlayer.setVolume(0,1);
         }
         catch (IOException ioe)
         {
