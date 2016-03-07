@@ -229,7 +229,7 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
         GLES20.glLinkProgram(mProgram);
 
         textures = createTextures();
-        leftStream = new PlayStream("rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", textures[0], this);
+        leftStream = new PlayStream("rtsp://192.168.1.114:5000", textures[0], this);
         leftStream.setToaster(toaster);
         leftStream.start();
         left = leftStream.getSurfaceTexture();
