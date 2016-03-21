@@ -1,13 +1,12 @@
 package com.example.octopuscabbage.vrmouse.rendering;
 
 import android.graphics.SurfaceTexture;
-import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 import android.view.Surface;
 
-import com.example.octopuscabbage.vrmouse.MainActivity;
+import com.example.octopuscabbage.vrmouse.CardboardActivity;
 import com.example.octopuscabbage.vrmouse.Toaster;
 
 import java.io.IOException;
@@ -55,7 +54,7 @@ public class PlayStream {
         mediaPlayer.setSurface(surface);
         try
         {
-            mediaPlayer.setDataSource(MainActivity.getContext(), uri);
+            mediaPlayer.setDataSource(CardboardActivity.getContext(), uri);
             mediaPlayer.prepareAsync();
             mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                 @Override

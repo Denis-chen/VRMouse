@@ -59,6 +59,7 @@ public class CardboardToaster extends LinearLayout implements Toaster{
     public void makeToast(String message){
         show3DToast(message);
     }
+
     public void show3DToast(String message) {
         setText(message);
         setTextAlpha(1f);

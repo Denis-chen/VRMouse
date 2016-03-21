@@ -1,11 +1,13 @@
 package com.example.octopuscabbage.vrmouse.rendering;
 
+import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.util.Log;
 
 import com.example.octopuscabbage.vrmouse.Toaster;
+import com.example.octopuscabbage.vrmouse.settings.SettingsStorage;
 import com.google.vrtoolkit.cardboard.CardboardView;
 import com.google.vrtoolkit.cardboard.Eye;
 import com.google.vrtoolkit.cardboard.HeadTransform;
@@ -42,14 +44,16 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
     private int mPositionHandle;
     private int mColorHandle;
     private int mTextureCoordHandle;
+    private Context applicationContext;
 
 
     private FloatBuffer vertexBuffer, textureVerticesBuffer;
 
-    public Renderer(){
+    public Renderer(Context ctx){
         mCamera = new float[16];
         mView = new float[16];
         quaternion = new float[4];
+        applicationContext = ctx;
     }
 
     public interface RotationListener{ //Wish android supported regular function callbacks
@@ -229,11 +233,15 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
         GLES20.glLinkProgram(mProgram);
 
         textures = createTextures();
-        leftStream = new PlayStream("rtsp://192.168.1.114:5000", textures[0], this);
+
+        SettingsStorage settingsStorage = new SettingsStorage(applicationContext);
+        leftStream = new PlayStream(settingsStorage.readLeftStreamLocation(), textures[0], this);
         leftStream.setToaster(toaster);
         leftStream.start();
         left = leftStream.getSurfaceTexture();
-        rightStream = new PlayStream("rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", textures[1], this);
+        //Test Stream:
+        //rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
+        rightStream = new PlayStream(settingsStorage.readRightStreamLocation(), textures[1], this);
         rightStream.setToaster(toaster);
         rightStream.start();
         right = rightStream.getSurfaceTexture();

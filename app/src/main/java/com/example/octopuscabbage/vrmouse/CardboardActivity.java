@@ -21,12 +21,9 @@ import android.os.Bundle;
 import com.example.octopuscabbage.vrmouse.rendering.Renderer;
 import com.google.vrtoolkit.cardboard.*;
 
-/**
- * A Cardboard sample application.
- */
-public class MainActivity extends CardboardActivity{
+public class CardboardActivity extends com.google.vrtoolkit.cardboard.CardboardActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "CardboardActivity";
 
     private CardboardView cardboardView;
     private CardboardToaster cardboardToaster;
@@ -41,10 +38,10 @@ public class MainActivity extends CardboardActivity{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MainActivity.context = getApplicationContext(); //Probably dangerous
+        CardboardActivity.context = getApplicationContext(); //Probably dangerous
 
-
-        renderer = new Renderer();
+        controller = new RobotController();
+        renderer = new Renderer(getContext());
         cardboardToaster = (CardboardToaster) findViewById(R.id.overlay);
         renderer.setToast(cardboardToaster);
         renderer.setOnTurnListener(controller);
