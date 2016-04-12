@@ -36,6 +36,16 @@
             android:id="@+id/right_stream_text"
             android:layout_gravity="center_horizontal"
             android:layout_weight="0.05" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Robot Command Base URL"/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/command_url"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="0.05" />
     </LinearLayout>
 
     <Button

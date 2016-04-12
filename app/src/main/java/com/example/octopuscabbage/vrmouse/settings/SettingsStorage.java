@@ -10,6 +10,7 @@ public class SettingsStorage {
     private static final String PREFS_NAME = "PrefsFile";
     private static final String PREFS_LEFT_STREAM_KEY = "LeftStream";
     private static final String PREFS_RIGHT_STREAM_KEY = "RightStream";
+    private static final String COMMAND_URL_KEY = "CommandURL";
 
     private static SharedPreferences sharedPreferences = null;
 
@@ -24,6 +25,16 @@ public class SettingsStorage {
         editor.putString(PREFS_LEFT_STREAM_KEY,leftStream);
         editor.putString(PREFS_RIGHT_STREAM_KEY,rightStream);
         editor.apply();
+    }
+
+    public void setCommandURL(String commandURL){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(COMMAND_URL_KEY,commandURL);
+        editor.apply();
+    }
+
+    public String readCommandURL(){
+        return sharedPreferences.getString(COMMAND_URL_KEY,"");
     }
 
     public String readLeftStreamLocation(){

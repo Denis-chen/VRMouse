@@ -19,6 +19,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.example.octopuscabbage.vrmouse.rendering.Renderer;
+import com.example.octopuscabbage.vrmouse.robot.RobotController;
 import com.google.vrtoolkit.cardboard.*;
 
 public class CardboardActivity extends com.google.vrtoolkit.cardboard.CardboardActivity {
@@ -51,6 +52,11 @@ public class CardboardActivity extends com.google.vrtoolkit.cardboard.CardboardA
         cardboardView.setRenderer(renderer);
         setCardboardView(cardboardView);
 
+    }
+
+    @Override
+    public void onCardboardTrigger(){
+        controller.toggleMovingForward();
     }
 
     @Override

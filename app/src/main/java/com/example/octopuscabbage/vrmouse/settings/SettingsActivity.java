@@ -2,7 +2,6 @@ package com.example.octopuscabbage.vrmouse.settings;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -29,16 +28,31 @@ public class SettingsActivity extends Activity {
             public void onClick(View v) {
                 final EditText leftText = (EditText) findViewById(R.id.left_stream_text);
                 final EditText rightText = (EditText) findViewById(R.id.right_stream_text);
-                if(rightText.getText().toString().equals("") || leftText.getText().toString().equals("")){
-                    Toast.makeText(SettingsActivity.this, "You must set the left and right stream fields", Toast.LENGTH_SHORT).show();
+                final EditText commandText = (EditText) findViewById(R.id.command_url);
+                String right = rightText.getText().toString();
+                String left = leftText.getText().toString();
+                if(!areValidandToastIfInvalid(left,right)){
                     return;
                 }
                 storage.setStreamLocations(leftText.getText().toString(),rightText.getText().toString());
+                storage.setCommandURL(commandText.getText().toString());
                 Intent mainProgram = new Intent(getBaseContext(), CardboardActivity.class);
                 startActivity(mainProgram);
             }
         });
    }
+
+    public boolean areValidandToastIfInvalid(String left, String right) {
+        if (right.equals("") || left.equals("")) {
+            Toast.makeText(SettingsActivity.this, "You must set the left and right stream fields", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!right.substring(0, 4).equals("rtsp") || !left.substring(0, 4).equals("rtsp")) {
+            Toast.makeText(SettingsActivity.this, "Your streams don't appear to be rtsp streams.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
 
     public void setLocationTextToPreviousLocations(){
         SettingsStorage storage = new SettingsStorage(getApplicationContext());

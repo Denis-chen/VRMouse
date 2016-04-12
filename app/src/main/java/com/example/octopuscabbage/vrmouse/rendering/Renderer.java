@@ -41,9 +41,6 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
 
     private ShortBuffer drawListBuffer;
     private int mProgram;
-    private int mPositionHandle;
-    private int mColorHandle;
-    private int mTextureCoordHandle;
     private Context applicationContext;
 
 
@@ -86,21 +83,15 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
         }
         //I think Y is the major angle we care about?
         Log.i("renderer","X: " + quaternion[0] + " Y: " + quaternion[1] + " Z: " + quaternion[2] + " W: " + quaternion[3]);
+
         float[] mtx = new float[16];
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         left.updateTexImage();
         left.getTransformMatrix(mtx);
         right.updateTexImage();
         right.getTransformMatrix(mtx);
     }
 
-    @Override
-    public void onDrawEye(Eye eye) {
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-        GLES20.glUseProgram(mProgram);
-
+    public void drawEye(Eye eye){
         int type = eye.getType();
         if(type == Eye.Type.LEFT){
             GLES20.glActiveTexture(GL_TEXTURE_EXTERNAL_OES);
@@ -112,36 +103,36 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
         } else {
                 Log.e(TAG,"Somethings gone wrong" + type);
         }
+    }
 
+    @Override
+    public void onDrawEye(Eye eye) {
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
+        GLES20.glUseProgram(mProgram);
 
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "position");
+        drawEye(eye);
+
+        int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "position");
         GLES20.glEnableVertexAttribArray(mPositionHandle);
         GLES20.glVertexAttribPointer(mPositionHandle, RenderConstants.COORDS_PER_VERTEX, GLES20.GL_FLOAT,
                 false, RenderConstants.vertexStride, vertexBuffer);
 
-
-        mTextureCoordHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
+        int mTextureCoordHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
         GLES20.glEnableVertexAttribArray(mTextureCoordHandle);
         GLES20.glVertexAttribPointer(mTextureCoordHandle, RenderConstants.COORDS_PER_VERTEX, GLES20.GL_FLOAT,
                 false, RenderConstants.vertexStride, textureVerticesBuffer);
 
-        mColorHandle = GLES20.glGetAttribLocation(mProgram, "s_texture");
-
-
+        int mColorHandle = GLES20.glGetAttribLocation(mProgram, "s_texture");
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, RenderConstants.drawOrder.length,
                 GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
-
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mTextureCoordHandle);
 
         Matrix.multiplyMM(mView, 0, eye.getEyeView(), 0, mCamera, 0);
-
-
-
     }
 
     @Override
@@ -192,11 +183,9 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
             GLES20.glDeleteShader(shader);
             shader = 0;
         }
-
         if (shader == 0) {
             throw new RuntimeException("Error creating shader.");
         }
-
         return shader;
     }
 
