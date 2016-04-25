@@ -1,8 +1,8 @@
 package com.example.octopuscabbage.vrmouse.robot;
 
 /**
- * Created by octopuscabbage on 4/12/16.
+ * Created by octopuscabbage on 4/24/16.
  */
-public class RobotNetworkClient {
-    //todo fill this out, this will be where the commands are accessed
+public interface RobotNetworkClient {
+    void sendTurnDirection(int angle);
 }

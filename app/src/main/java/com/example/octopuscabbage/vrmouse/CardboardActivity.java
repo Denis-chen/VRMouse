@@ -19,7 +19,8 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.example.octopuscabbage.vrmouse.rendering.Renderer;
-import com.example.octopuscabbage.vrmouse.robot.RobotController;
+import com.example.octopuscabbage.vrmouse.robot.RobotNetworkController;
+import com.example.octopuscabbage.vrmouse.settings.SettingsStorage;
 import com.google.vrtoolkit.cardboard.*;
 
 public class CardboardActivity extends com.google.vrtoolkit.cardboard.CardboardActivity {
@@ -30,7 +31,7 @@ public class CardboardActivity extends com.google.vrtoolkit.cardboard.CardboardA
     private CardboardToaster cardboardToaster;
     private static Context context;
     private static Renderer renderer;
-    private static RobotController controller;
+    private static RobotNetworkController controller;
 
     public static Context getContext(){
         return context;
@@ -41,7 +42,7 @@ public class CardboardActivity extends com.google.vrtoolkit.cardboard.CardboardA
         super.onCreate(savedInstanceState);
         CardboardActivity.context = getApplicationContext(); //Probably dangerous
 
-        controller = new RobotController();
+        controller = new RobotNetworkController(new SettingsStorage(getContext()).readCommandURL());
         renderer = new Renderer(getContext());
         cardboardToaster = (CardboardToaster) findViewById(R.id.overlay);
         renderer.setToast(cardboardToaster);
@@ -52,11 +53,6 @@ public class CardboardActivity extends com.google.vrtoolkit.cardboard.CardboardA
         cardboardView.setRenderer(renderer);
         setCardboardView(cardboardView);
 
-    }
-
-    @Override
-    public void onCardboardTrigger(){
-        controller.toggleMovingForward();
     }
 
     @Override
