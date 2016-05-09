@@ -31,28 +31,23 @@ public class SettingsActivity extends Activity {
                 final EditText commandText = (EditText) findViewById(R.id.command_url);
                 String right = rightText.getText().toString();
                 String left = leftText.getText().toString();
-                if(!areValidandToastIfInvalid(left,right)){
+                if(!RTSPStreamLocationValidator.isValid(left)){
+                    Toast.makeText(SettingsActivity.this, "Left stream is invalid", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                storage.setStreamLocations(leftText.getText().toString(),rightText.getText().toString());
+
+                if(!RTSPStreamLocationValidator.isValid(right)){
+                    Toast.makeText(SettingsActivity.this, "Left stream is invalid", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                storage.setStreamLocations(left,right);
                 storage.setCommandURL(commandText.getText().toString());
                 Intent mainProgram = new Intent(getBaseContext(), CardboardActivity.class);
                 startActivity(mainProgram);
             }
         });
    }
-
-    public boolean areValidandToastIfInvalid(String left, String right) {
-        if (right.equals("") || left.equals("")) {
-            Toast.makeText(SettingsActivity.this, "You must set the left and right stream fields", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (!right.substring(0, 4).equals("rtsp") || !left.substring(0, 4).equals("rtsp")) {
-            Toast.makeText(SettingsActivity.this, "Your streams don't appear to be rtsp streams.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
-    }
 
     public void setLocationTextToPreviousLocations(){
         SettingsStorage storage = new SettingsStorage(getApplicationContext());

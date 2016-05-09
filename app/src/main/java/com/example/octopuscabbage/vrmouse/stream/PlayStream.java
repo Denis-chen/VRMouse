@@ -1,4 +1,4 @@
-package com.example.octopuscabbage.vrmouse.rendering;
+package com.example.octopuscabbage.vrmouse.stream;
 
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;

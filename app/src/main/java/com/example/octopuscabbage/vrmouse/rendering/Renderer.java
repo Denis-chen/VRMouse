@@ -7,16 +7,13 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import com.example.octopuscabbage.vrmouse.Toaster;
-import com.example.octopuscabbage.vrmouse.settings.SettingsStorage;
+import com.example.octopuscabbage.vrmouse.stream.StreamContainer;
 import com.google.vrtoolkit.cardboard.CardboardView;
 import com.google.vrtoolkit.cardboard.Eye;
 import com.google.vrtoolkit.cardboard.HeadTransform;
 import com.google.vrtoolkit.cardboard.Viewport;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
+import java.nio.*;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -28,10 +25,7 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
     private static final String TAG = "Render";
     private static final int GL_TEXTURE_EXTERNAL_OES = 0x8D65; //I have no idea what this does
     private float[] quaternion;
-    private SurfaceTexture left;
-    private SurfaceTexture right;
-    private PlayStream leftStream;
-    private PlayStream rightStream;
+
     private RotationListener rotationListener;
     private Toaster toaster;
     private int[] textures;
@@ -42,7 +36,7 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
     private ShortBuffer drawListBuffer;
     private int mProgram;
     private Context applicationContext;
-
+    private StreamContainer streamContainer;
 
     private FloatBuffer vertexBuffer, textureVerticesBuffer;
 
@@ -85,10 +79,7 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
         Log.i("renderer","X: " + quaternion[0] + " Y: " + quaternion[1] + " Z: " + quaternion[2] + " W: " + quaternion[3]);
 
         float[] mtx = new float[16];
-        left.updateTexImage();
-        left.getTransformMatrix(mtx);
-        right.updateTexImage();
-        right.getTransformMatrix(mtx);
+        streamContainer.onUpdate(mtx);
     }
 
     public void drawEye(Eye eye){
@@ -193,25 +184,11 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
     public void onSurfaceCreated(EGLConfig eglConfig) {
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 0.5f); // Dark background so text shows up well
 
-        ByteBuffer bb = ByteBuffer.allocateDirect(RenderConstants.squareVertices.length * 4);
-        bb.order(ByteOrder.nativeOrder());
-        vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(RenderConstants.squareVertices);
-        vertexBuffer.position(0);
+        vertexBuffer = BufferAllocator.allocateFloatBuffer(vertexBuffer,RenderConstants.squareVertices,RenderConstants.squareVertices.length * 4);
 
+        drawListBuffer = BufferAllocator.allocateShortBuffer(drawListBuffer,RenderConstants.drawOrder, RenderConstants.drawOrder.length * 2);
 
-        ByteBuffer dlb = ByteBuffer.allocateDirect(RenderConstants.drawOrder.length * 2);
-        dlb.order(ByteOrder.nativeOrder());
-        drawListBuffer = dlb.asShortBuffer();
-        drawListBuffer.put(RenderConstants.drawOrder);
-        drawListBuffer.position(0);
-
-
-        ByteBuffer bb2 = ByteBuffer.allocateDirect(RenderConstants.textureVertices.length * 4);
-        bb2.order(ByteOrder.nativeOrder());
-        textureVerticesBuffer = bb2.asFloatBuffer();
-        textureVerticesBuffer.put(RenderConstants.textureVertices);
-        textureVerticesBuffer.position(0);
+        textureVerticesBuffer = BufferAllocator.allocateFloatBuffer(textureVerticesBuffer,RenderConstants.textureVertices, RenderConstants.textureVertices.length * 4);
 
         int vertexShader = loadGLShader(GLES20.GL_VERTEX_SHADER, RenderConstants.vertextShaderCode);
         int fragmentShader = loadGLShader(GLES20.GL_FRAGMENT_SHADER, RenderConstants.fragmentShaderCode);
@@ -222,23 +199,12 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
         GLES20.glLinkProgram(mProgram);
 
         textures = createTextures();
-
-        SettingsStorage settingsStorage = new SettingsStorage(applicationContext);
-        leftStream = new PlayStream(settingsStorage.readLeftStreamLocation(), textures[0], this);
-        leftStream.setToaster(toaster);
-        leftStream.start();
-        left = leftStream.getSurfaceTexture();
-        //Test Stream:
-        //rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
-        rightStream = new PlayStream(settingsStorage.readRightStreamLocation(), textures[1], this);
-        rightStream.setToaster(toaster);
-        rightStream.start();
-        right = rightStream.getSurfaceTexture();
+        streamContainer = new StreamContainer(applicationContext, toaster, textures, this);
     }
 
     @Override
     public void onRendererShutdown() {
-        pauseStreams();
+        streamContainer.pauseStreams();
     }
 
     @Override
@@ -246,27 +212,5 @@ public class Renderer implements CardboardView.StereoRenderer, SurfaceTexture.On
 
     }
 
-    public void pauseStreams(){
-        applyToBothStreams(new StreamApply() {
-            @Override
-            public void applyToStream(PlayStream stream) {
-                stream.pause();
-            }
-        });
-    }
 
-    /*
-    Used for applying an operation to a stream.
-    I miss Java 8
-     */
-    public interface StreamApply {
-        void applyToStream(PlayStream stream);
-    }
-    /*
-    Apply an operation to the left and right stream;
-     */
-    public void applyToBothStreams(StreamApply apply){
-        apply.applyToStream(leftStream);
-        apply.applyToStream(rightStream);
-    }
 }
